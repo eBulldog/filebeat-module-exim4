@@ -62,7 +62,7 @@
         "target_field": "@timestamp",
         "timezone": "{{ exim4.timezone }}",
         "formats": [
-          "yyyy-MM-dd HH:mm:ss"
+          "uuuu-MM-dd HH:mm:ss"
         ]
       }
     },
