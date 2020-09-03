@@ -44,12 +44,6 @@
       }
     },
     {
-      "rename": {
-        "field": "message",
-        "target_field": "exim4.raw_msg"
-      }
-    },
-    {
       "set": {
         "field": "exim4.timezone",
         "value": "UTC",
