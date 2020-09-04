@@ -1,4 +1,4 @@
-module_version: 1.0
+module_version: 1.2
 
 var:
   - name: paths
