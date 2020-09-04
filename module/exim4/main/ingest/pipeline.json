@@ -12,8 +12,10 @@
           "EXIM4_INTERNAL_MSGID": "%{EXIM4_ALNUM}{6}-%{EXIM4_ALNUM}{6}-%{EXIM4_ALNUM}{2}",
           "EXIM4_FLAG_RECEPTION": "<=",
           "EXIM4_FLAG_DELIVERY": "=>|->|>>",
+          "EXIM4_FLAG_FAILED": "\\*\\*",
+          "EXIM4_FLAG_DEFERRED": "==",
           "EXIM4_FLAG": "%{EXIM4_FLAG_RECEPTION}|\\(=|%{EXIM4_FLAG_DELIVERY}|\\*>|\\*\\*|==",
-          "EXIM4_REMOTEHOST": "H=\\(?%{IPORHOST:exim4.remote_host}\\)?(%{SPACE}\\(%{IPORHOST:exim4.helo_name}\\))? \\[%{IP:exim4.remote_addr}\\]",
+          "EXIM4_REMOTEHOST": "H=\\(?%{IPORHOST:exim4.remote_host}\\)?(%{SPACE}\\(%{NOTSPACE:exim4.helo_name}\\))? \\[%{IP:exim4.remote_addr}\\]",
           "EXIM4_LOCAL_USER": "U=%{USERNAME:exim4.local_user}",
           "EXIM4_BOUNCE_REF": "R=%{NOTSPACE:exim4.bounce_ref}",
           "EXIM4_PROTO": "P=%{NOTSPACE:exim4.protocol}",
@@ -27,6 +29,7 @@
           "EXIM4_AUTHENTICATOR": "A=%{NOTSPACE:exim4.authenticator}",
           "EXIM4_MSG_ID": "id=%{NOTSPACE:exim4.msg_id}",
           "EXIM4_ROUTER": "R=%{NOTSPACE:exim4.router}",
+          "EXIM4_DEFER_FIELD": "defer \\(%{INT:exim4.defer_int}\\)",
           "EXIM4_TRANSPORT": "T=%{NOTSPACE:exim4.transport}",
           "EXIM4_SHADOW_TRANSPORT": "ST=%{NOTSPACE:exim4.shadow_transport}(%{SPACE}\\(%{DATA:exim4.shadow_transport_error}\\))?",
           "EXIM4_FINAL_ADDRESS": "%{NOTSPACE:exim4.final_address}",
@@ -37,11 +40,15 @@
           "EXIM4_DELIVERY_FIELD": "%{EXIM4_ROUTER}|%{EXIM4_TRANSPORT}|%{EXIM4_AUTHENTICATOR}|%{EXIM4_SHADOW_TRANSPORT}|%{EXIM4_REMOTEHOST}|%{EXIM4_TLS_CIPHER_SUITE}|%{EXIM4_CV}|%{EXIM4_DN}|%{EXIM4_C}",
           "EXIM4_LINE_START": "^%{EXIM4_DATETIME_TZ} %{EXIM4_INTERNAL_MSGID:exim4.id}",
           "EXIM4_RECEPTION": "%{EXIM4_LINE_START} %{EXIM4_FLAG_RECEPTION:exim4.flag} %{NOTSPACE:exim4.envelope_sender} (%{SPACE}%{EXIM4_RECEPTION_FIELD})*",
-          "EXIM4_DELIVERY": "%{EXIM4_LINE_START} %{EXIM4_FLAG_DELIVERY:exim4.flag} %{EXIM4_DELIVERY_ADDRESS} (%{SPACE}%{EXIM4_DELIVERY_FIELD})*"
+          "EXIM4_DELIVERY": "%{EXIM4_LINE_START} %{EXIM4_FLAG_DELIVERY:exim4.flag} %{EXIM4_DELIVERY_ADDRESS} (%{SPACE}%{EXIM4_DELIVERY_FIELD})*",
+          "EXIM4_FAILED": "%{EXIM4_LINE_START} %{EXIM4_FLAG_FAILED:exim4.flag} %{EXIM4_DELIVERY_ADDRESS}(%{SPACE}%{EXIM4_DELIVERY_FIELD})*:%{SPACE}%{GREEDYDATA:exim4.extra_data}",
+          "EXIM4_DEFERRED": "%{EXIM4_LINE_START} %{EXIM4_FLAG_DEFERRED:exim4.flag} %{EXIM4_DELIVERY_ADDRESS}(%{SPACE}%{EXIM4_DELIVERY_FIELD}|%{SPACE}%{EXIM4_DEFER_FIELD})*:%{SPACE}%{GREEDYDATA:exim4.extra_data}"
         },
         "patterns": [
           "%{EXIM4_RECEPTION}",
-          "%{EXIM4_DELIVERY}"
+          "%{EXIM4_DELIVERY}",
+          "%{EXIM4_FAILED}",
+          "%{EXIM4_DEFERRED}"
         ]
       }
     },
@@ -54,12 +61,12 @@
     },
     {
       "date": {
-        "field": "exim4.datetime",
-        "target_field": "@timestamp",
         "timezone": "{{ exim4.timezone }}",
         "formats": [
           "uuuu-MM-dd HH:mm:ss"
-        ]
+        ],
+        "field": "exim4.datetime",
+        "target_field": "@timestamp"
       }
     },
     {
@@ -70,6 +77,11 @@
     {
       "remove": {
         "field": "exim4.timezone"
+      }
+    },
+    {
+      "geoip": {
+        "field": "exim4.remote_addr"
       }
     }
   ]
