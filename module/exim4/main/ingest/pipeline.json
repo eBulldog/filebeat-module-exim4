@@ -81,7 +81,8 @@
     },
     {
       "geoip": {
-        "field": "exim4.remote_addr"
+        "field": "exim4.remote_addr",
+        "ignore_missing": "true"
       }
     }
   ]
