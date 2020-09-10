@@ -1,0 +1,53 @@
+{
+  "description": "Pipeline for parsing our custom queue logger.",
+  "processors": [
+    {
+      "grok": {
+        "field": "message",
+        "pattern_definitions": {
+          "EXIM4_DATETIME": "%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{HOUR}:%{MINUTE}:%{SECOND}",
+          "EXIM4_TZ": "[+-]\\d{4}",
+          "EXIM4_DATETIME_TZ": "%{EXIM4_DATETIME:exim4.datetime}( %{EXIM4_TZ:exim4.timezone})?",
+	  "EXIM4_EXIQSUMM": "exiqsumm:",
+	  "EXIM4_QUEUE_COUNT": "C=%{NOTSPACE:exim4.queue.count}",
+	  "EXIM4_QUEUE_VOLUME": "V=%{NOTSPACE:exim4.queue.volume}",
+	  "EXIM4_QUEUE_OLDEST": "O=%{NOTSPACE:exim4.queue.oldest}",
+	  "EXIM4_QUEUE_NEWEST": "N=%{NOTSPACE:exim4.queue.newest}",
+	  "EXIM4_QUEUE_DOMAIN": "D=%{NOTSPACE:exim4.queue.domain}",
+          "EXIM4_QUEUE_LINE_START": "^%{EXIM4_DATETIME_TZ} %{EXIM4_QUEUE_COUNT} %{EXIM4_QUEUE_VOLUME} %{EXIM4_QUEUE_OLDEST} %{EXIM4_QUEUE_NEWEST} %{EXIM4_QUEUE_DOMAIN}",
+          "EXIM4_QUEUE_LINE": "%{EXIM4_QUEUE_LINE_START} "
+        },
+        "patterns": [
+          "%{EXIM4_QUEUE_LINE}"
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "exim4.timezone",
+        "value": "UTC",
+        "override": false
+      }
+    },
+    {
+      "date": {
+        "timezone": "{{ exim4.timezone }}",
+        "formats": [
+          "uuuu-MM-dd HH:mm:ss"
+        ],
+        "field": "exim4.datetime",
+        "target_field": "@timestamp"
+      }
+    },
+    {
+      "remove": {
+        "field": "exim4.datetime"
+      }
+    },
+    {
+      "remove": {
+        "field": "exim4.timezone"
+      }
+    }
+  ]
+}
