@@ -82,7 +82,7 @@
     {
       "geoip": {
         "field": "exim4.remote_addr",
-        "ignore_missing": "true"
+        "ignore_missing": true
       }
     }
   ]
