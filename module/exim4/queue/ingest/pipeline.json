@@ -9,7 +9,7 @@
           "EXIM4_TZ": "[+-]\\d{4}",
           "EXIM4_DATETIME_TZ": "%{EXIM4_DATETIME:exim4.datetime}( %{EXIM4_TZ:exim4.timezone})?",
 	  "EXIM4_EXIQSUMM": "exiqsumm:",
-	  "EXIM4_QUEUE_COUNT": "C=%{INT:exim4.queue.count:int}",
+	  "EXIM4_QUEUE_COUNT": "C=%{NUMBER:exim4.queue.count:int}",
 	  "EXIM4_QUEUE_VOLUME": "V=%{NOTSPACE:exim4.queue.volume}",
 	  "EXIM4_QUEUE_OLDEST": "O=%{NOTSPACE:exim4.queue.oldest}",
 	  "EXIM4_QUEUE_NEWEST": "N=%{NOTSPACE:exim4.queue.newest}",
@@ -48,6 +48,12 @@
       "remove": {
         "field": "exim4.timezone"
       }
+    },
+    {
+    "convert": {
+      "field": "exim4.queue.count",
+      "type": "integer"
     }
+  }
   ]
 }
